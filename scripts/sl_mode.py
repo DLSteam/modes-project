@@ -1,61 +1,93 @@
-#!/usr/bin/python
-# module load gcc/gcc-4.8.0
-# module load python/2.7.5
+#!/usr/bin/env python3
+#
+# PEP8 compliant
+#
+# Module configuration recommended for SOM:
+# module purge; module load gcc/gcc-4.9.0 python/3.4.0
 
-import pandas as pd 
-from pandas import ExcelWriter
+# Python2 compatibility
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+try:
+    input = raw_input
+except NameError:
+    pass
+
+# Packages
+import sys
 import argparse
+import pandas as pd
 
-# py_slidingWindow_xlsx release information
-__version__ = '0.0.3'
+# Release information
+__version__ = '0.0.4'
+_scriptname = 'sl_mode'
 _verdata = 'Feb 2015'
 _devflag = True
 
 
-#########################################################################> MAIN
+def slmode(sheet, dfsheet, size):
+    """Apply sliding window to sheet."""
+    with pd.ExcelWriter('sw_mode_' + str(size) + 't_' + sheet +
+                        '.xlsx') as writer:
+        columnas = dfsheet.columns  # store columns names
+        dfsheet.index.name = ''
+        for i in range(len(columnas)-size+1):
+            dfsheet.to_excel(excel_writer=writer,
+                             sheet_name='set_' + str(i+1),
+                             columns=columnas[i:i+size])
+
+
+def sw_authomatic_mode(xl_file):
+    """Process sheets of XLSX file.
+
+    NOTE: Skip sheets starting by underscore."""
+    dfs = {sheet: xl_file.parse(sheet, index_col=0)
+           for sheet in xl_file.sheet_names if (sheet[0] != '_')}
+    for sheet in dfs:
+        print('> Processing sheet', sheet, '... ', end='')
+        sys.stdout.flush()
+        try:
+            slmode(sheet, dfs[sheet], wind_size)
+        except (IndexError):
+            print('\033[91m ERROR! \033[0m Window too wide!')
+        except:
+            print('\033[91m ERROR! \033[0m')
+            raise
+        else:
+            print('\033[92m OK! \033[0m')
+
+# Argument Parser
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '-v', '--version',
+    action='version',
+    version=_scriptname + '.py ver. ' + __version__ + ' - ' + _verdata
+)
+parser.add_argument(
+    '-i', '--input',
+    help='input file',
+    metavar='FILE.XLSX',
+    type=str,
+    required=True
+)
+parser.add_argument(
+    '-s', '--size',
+    help='set the window size',
+    type=int,
+    default=5
+)
+args = parser.parse_args()
+file_name = args.input
+wind_size = args.size
 
 # Program Header
-print('\n=-= py_slidingWindow_xlsx =-= v' + __version__ + ' =-= ' +
+print('\n=-= ' + _scriptname + ' =-= v' + __version__ + ' =-= ' +
       _verdata + ' =-= by DLS team =-=')
-if(_devflag): 
-    print('\n>>> WARNING! THIS IS JUST A DEVELOPMENT SUBRELEASE.' + 
-          ' USE IT AT YOUR OWN RISK!')  
-
-
-# flags
-parser = argparse.ArgumentParser()
-parser.add_argument('-i','-input', help="input file", type=str)
-parser.add_argument('-s', '-size', help='set the window size', 
-	type=int, default=5)
-args = parser.parse_args()
-
-
-file_name = args.i
-xl_file = pd.ExcelFile(file_name)
-dfs = {sheet_name: xl_file.parse(sheet_name)
-	for sheet_name in xl_file.sheet_names}
+if(_devflag):
+    print('\n>>> WARNING! THIS IS JUST A DEVELOPMENT SUBRELEASE.' +
+          ' USE IT AT YOUR OWN RISK!\n')
 
 # slow slmode version (as R script)
-
-def slmode(sheet, size):
-	writer = ExcelWriter("sw_mode_" + str(size) + "t_" + 
-		sheet + ".xlsx")
-	columnas = dfs[str(sheet)].columns # store columns names
-	length = len(dfs[str(sheet)].columns)
-	new_df = pd.DataFrame(dfs[str(sheet)].iloc[:,0])
-	for i in range(1,length-(size-1)):
-		for j in range(0,(size)):
-			new_df[str(columnas[j+i])] = dfs[str(sheet)].iloc[:,j+i]
-		new_df.to_excel(writer,"set_" + str(i), index=False)
-		new_df = pd.DataFrame(dfs[str(sheet)].iloc[:,0])
-	writer.save()
-
-def sw_authomatic_mode():
-	sheets = xl_file.sheet_names
-	for name in sheets:
-		print "processing sheet", name
-		slmode(name, args.s)
-		print name, "finished!"
-
-sw_authomatic_mode()
-
+xl_file = pd.ExcelFile(file_name)
+sw_authomatic_mode(xl_file)
+print()
