@@ -56,6 +56,22 @@ def sw_authomatic_mode(xl_file):
         else:
             print('\033[92m OK! \033[0m')
 
+# lets select which sheets we want to process
+
+def sw_interactive_mode(xl_file):
+    """Allows to select sheets to process
+
+    NOTE: Skip sheet starting by underscore"""
+    dfs = {sheet: xl_file.parse(sheet, index_col=0)
+           for sheet in xl_file.sheet_names if (sheet[0] != '_')}
+    print("Which one do you want to process: ")
+    sheet_list = list(dfs.keys())
+    for sheet in sheet_list:
+        print(sheet, "\t", "[" + str(sheet_list.index(sheet)) + "]")
+    algo =input("Select the sheet: ")
+    print(algo)
+
+
 # Argument Parser
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -89,5 +105,5 @@ if(_devflag):
 
 # slow slmode version (as R script)
 xl_file = pd.ExcelFile(file_name)
-sw_authomatic_mode(xl_file)
+sw_interactive_mode(xl_file)
 print()
