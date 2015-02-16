@@ -68,7 +68,7 @@ def sw_interactive_mode(xl_file):
     sheet_list = list(dfs.keys())
     for sheet in sheet_list:
         print(sheet, "\t", "[" + str(sheet_list.index(sheet)) + "]")
-    algo =input("Select the sheet: ")
+    algo = input("Select the sheet: ")
     print(algo)
 
 
@@ -105,5 +105,5 @@ if(_devflag):
 
 # slow slmode version (as R script)
 xl_file = pd.ExcelFile(file_name)
-sw_interactive_mode(xl_file)
+sw_authomatic_mode(xl_file)
 print()
