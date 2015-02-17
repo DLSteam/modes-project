@@ -49,12 +49,12 @@ def sw_authomatic_mode(xl_file):
         try:
             slmode(sheet, dfs[sheet], wind_size)
         except (IndexError):
-            print('\033[91m ERROR! \033[0m Window too wide!')
+            print('\033[91m \t ERROR! \033[0m Window too wide!')
         except:
-            print('\033[91m ERROR! \033[0m')
+            print('\033[91m \t ERROR! \033[0m')
             raise
         else:
-            print('\033[92m OK! \033[0m')
+            print('\033[92m \t OK! \033[0m')
 
 # lets select which sheets we want to process
 
