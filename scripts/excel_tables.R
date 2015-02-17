@@ -87,9 +87,8 @@ final_plot <- ggplot2.multiplot(p1,p2, cols=1)
 dev.off()
 
 
-#################################
-##  TO DO:
-##		- fix loop in packmode
-##		- 
+# to add vertical lines in the plot, use these commands
 
-
+u <- c(6,12,25) # points where the lines are going to be drawn
+p1 <- p1 + geom_vline(xintercept=u, colour="blue") 
+p2 <- p2 + geom_vline(xintercept=u, colour="yellow")

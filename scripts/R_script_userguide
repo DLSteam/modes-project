@@ -1,0 +1,73 @@
+User guide to .R script
+
+BEFORE loading the packages, you must increase the java heap memory of R using the command:
+
+	options( java.parameters = "-Xmx4g" )
+
+After that, you must load all the required packages (xlsx, ggplot2 and easyGgplot2). In order to install these packages,
+you must enter in a R session and type
+
+	install.packages("name_of_the_library")
+
+To install easyGgplot2, you should follow these instructions:
+
+	install.packages("devtools")
+	library(devtools)
+	install_github("easyGgplot2", "kassambara")
+
+The script consist on two main functions to create the excel files, but as we have the python script, those functions
+are not the best option due to their slow speed. Nevertheless, they are a good option if you cannot connect to one of 
+the SOM machines. 
+To use these functions, copy and paste from the text file to the console. After this, you can use them typing the 
+corresponding function name and passing the desired size value between the parenthesis. For example:
+
+	sw_mode(5)
+
+To plot the results from complexCruncher, one must use the last part of the script. First of all, you must load the excel
+file. 
+
+	cmplx_data <- read.xlsx("cmplxcruncher.xlsx", sheetName="feces_genus_6slmode", header=TRUE)
+
+As you may see, we need to provide the file name and the sheet we want to open. 
+Next, you must create a vector with the total number of datasets. If you want to create a plot with equidistant points in the
+x axis, you can use this command:
+
+	x <- 1:length(cmplx_data$xW_B)
+
+But, if you want to plot the real time, you must create a vector with the same timepoints as datasets, indicating (by hand) 
+every timepoint with the number of the day/month/year when the sample was colected. 
+For example, if we have 5 datasets, and the colection days were 1,5,6,8,9, you must create a vector as follows:
+
+	x <- c(1,5,6,8,9)
+
+Next, we are going to create the V and beta plots from the xWeighted data as follows:
+
+	p1 <- ggplot(cmplx_data, aes(x=x, y=cmplx_data$xW_B)) + 
+		geom_errorbar(aes(ymin=cmplx_data$xW_B-cmplx_data$xW_B_err, ymax=cmplx_data$xW_B+cmplx_data$xW_B_err), width=.1) + 
+		geom_line() + geom_point() + 
+		xlab("timeset") + ylab("wV") + ggtitle("wV variation") + # axis and plot labels   
+		theme_bw() # sets background colour to white
+
+	p2 <- ggplot(cmplx_data, aes(x=x, y=cmplx_data$xW_beta)) + 
+		geom_errorbar(aes(ymin=cmplx_data$xW_beta-cmplx_data$xW_beta_err, ymax=cmplx_data$xW_beta+cmplx_data$xW_beta_err), 
+				width=.1, colour="red") + 
+		geom_line(colour="red") + geom_point() + 
+		xlab("timeset") + ylab("w_beta") + ggtitle("w_beta variation") + # axis and plot labels   
+		theme_bw() # sets background colour to white
+
+
+Please, note that we can modify several things in these plots. You can change the colour of the error bars in the colour option 
+whithin geom_errorbar. In the same way, if you want to chage the colour of the lines or points in the main graph, you can add
+the colour option inside geom_line or geom_point. 
+You can change also the plot title, or the axis names. These options are in xlab, ylab and ggtitle.
+
+Finally, once we have the final plots stored in the variables p1 and p2, we can save it in a pdf file with these commands:
+
+	pdf("feces_g_6t_swmode.pdf")
+	final_plot <- ggplot2.multiplot(p1,p2, cols=1)
+	dev.off()
+
+Inside the pdf command, you should change the name of the file you are going to create.
+
+
+
