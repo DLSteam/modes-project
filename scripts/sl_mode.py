@@ -68,8 +68,16 @@ def sw_interactive_mode(xl_file):
     sheet_list = list(dfs.keys())
     for sheet in sheet_list:
         print(sheet, "\t", "[" + str(sheet_list.index(sheet)) + "]")
-    algo = input("Select the sheet: ")
-    print(algo)
+    num_sheet = input("Select the sheet: ")
+    try:
+        slmode(sheet_list[int(num_sheet)], dfs[sheet_list[int(num_sheet)]], wind_size)
+    except (IndexError):
+        print('> Processing sheet', sheet_list[int(num_sheet)], '...' ,'\033[91m \t ERROR! \033[0m Window too wide!')
+    except:
+        print('> Processing sheet', sheet_list[int(num_sheet)], '...' ,'\033[91m \t ERROR! \033[0m')
+        raise
+    else:
+        print('> Processing sheet', sheet_list[int(num_sheet)], '...' ,'\033[92m \t OK! \033[0m')
 
 
 # Argument Parser
@@ -87,14 +95,25 @@ parser.add_argument(
     required=True
 )
 parser.add_argument(
-    '-s', '--size',
+    '-w', '--window',
     help='set the window size',
     type=int,
     default=5
 )
+parser.add_argument(
+    '-a', '--authomatic',
+    action='store_true',
+    help='authomatic mode',
+)
+parser.add_argument(
+    '-s', '--sheets',
+    action='store_true',
+    help='select sheets to process',
+)
 args = parser.parse_args()
 file_name = args.input
-wind_size = args.size
+wind_size = args.window
+
 
 # Program Header
 print('\n=-= ' + _scriptname + ' =-= v' + __version__ + ' =-= ' +
@@ -105,5 +124,13 @@ if(_devflag):
 
 # slow slmode version (as R script)
 xl_file = pd.ExcelFile(file_name)
-sw_authomatic_mode(xl_file)
+
+if args.authomatic:
+    sw_authomatic_mode(xl_file)
+elif args.sheets:
+    sw_interactive_mode(xl_file)
+#    if input("Do you want to process anohter sheet? (type 'y' or 'n': ") == 'y':
+#        sw_interactive_mode(xl_file)
+#    elif input("Do you want to process anohter sheet? (type 'y' or 'n': ") == 'n':
+ #       None
 print()
