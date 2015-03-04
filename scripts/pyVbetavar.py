@@ -19,9 +19,9 @@ import argparse
 import pandas as pd
 
 # Release information
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 _scriptname = 'pyVbetavar'
-_verdata = 'Feb 2015'
+_verdata = 'Mar 2015'
 _devflag = True
 
 
@@ -39,12 +39,10 @@ def swmode(sheet, dfsheet, size):
                         '.xlsx') as writer:
         columnas = A.columns  # store columns names
         A.index.name = ''
-        for i in range(len(columnas)-size+1):
+        for i in range(len(columnas) - size + 1):
             A.to_excel(excel_writer=writer,
-                             sheet_name='set_' + str(i+1),
-                             columns=columnas[i:i+size])
-
-
+                       sheet_name='set_' + str(i + 1),
+                       columns=columnas[i:i + size])
 
 
 def sigma_auth(xl_file):
@@ -53,8 +51,8 @@ def sigma_auth(xl_file):
     NOTE: Skip sheets starting by underscore."""
     df_mean = pd.DataFrame()
     df_std = pd.DataFrame()
-    dfs = {sheet: xl_file.parse(sheet, index_col=0) 
-        for sheet in xl_file.sheet_names if (sheet[0] != '_')}
+    dfs = {sheet: xl_file.parse(sheet, index_col=0)
+           for sheet in xl_file.sheet_names if (sheet[0] != '_')}
     print('> Processing sheets')
     for sheet in dfs:
         A = dfs[sheet]
@@ -67,8 +65,6 @@ def sigma_auth(xl_file):
     with pd.ExcelWriter('variance_mean.xlsx') as writer:
         df_mean.to_excel(excel_writer=writer, sheet_name='average')
         df_std.to_excel(excel_writer=writer, sheet_name='std_dev')
-
-
 
 
 def sw_authomatic_mode(xl_file):
@@ -90,7 +86,6 @@ def sw_authomatic_mode(xl_file):
         else:
             print('\033[92m \t OK! \033[0m')
 
-# lets select which sheets we want to process
 
 def sw_interactive_mode(xl_file):
     """Allows to select sheets to process
@@ -104,24 +99,24 @@ def sw_interactive_mode(xl_file):
         print(sheet, "\t", "[" + str(sheet_list.index(sheet)) + "]")
     num_sheet = input("Select the sheet: ")
     try:
-        swmode(sheet_list[int(num_sheet)], 
-            dfs[sheet_list[int(num_sheet)]], wind_size)
+        swmode(sheet_list[int(num_sheet)],
+               dfs[sheet_list[int(num_sheet)]], wind_size)
     except (IndexError):
-        print('> Processing sheet', sheet_list[int(num_sheet)], 
-            '...' ,'\033[91m \t ERROR! \033[0m Window too wide!')
+        print('> Processing sheet', sheet_list[int(num_sheet)],
+              '...', '\033[91m \t ERROR! \033[0m Window too wide!')
     except:
-        print('> Processing sheet', sheet_list[int(num_sheet)], 
-            '...' ,'\033[91m \t ERROR! \033[0m')
+        print('> Processing sheet', sheet_list[int(num_sheet)],
+              '...', '\033[91m \t ERROR! \033[0m')
         raise
     else:
-        print('> Processing sheet', sheet_list[int(num_sheet)], 
-            '...' ,'\033[92m \t OK! \033[0m')
+        print('> Processing sheet', sheet_list[int(num_sheet)],
+              '...', '\033[92m \t OK! \033[0m')
 
 
 # Argument Parser
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    '-v', '--version',
+    '-V', '--version',
     action='version',
     version=_scriptname + '.py ver. ' + __version__ + ' - ' + _verdata
 )
@@ -139,9 +134,9 @@ parser.add_argument(
     default=5
 )
 parser.add_argument(
-    '-a', '--authomatic',
+    '-a', '--automatic',
     action='store_true',
-    help='authomatic mode',
+    help='automatic mode',
 )
 parser.add_argument(
     '-s', '--sheets',
@@ -151,7 +146,7 @@ parser.add_argument(
 parser.add_argument(
     '-d', '--variance',
     action='store_true',
-    help='sigma and mean of each sheet',
+    help='sigma and mean of every sheet',
 )
 args = parser.parse_args()
 file_name = args.input
@@ -174,6 +169,5 @@ elif args.sheets:
     sw_interactive_mode(xl_file)
 elif args.variance:
     sigma_auth(xl_file)
-
 
 print()
