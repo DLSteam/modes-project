@@ -19,7 +19,7 @@ import argparse
 import pandas as pd
 
 # Release information
-__version__ = '0.0.5'
+__version__ = '0.0.7'
 _scriptname = 'pyVbetavar'
 _verdata = 'Feb 2015'
 _devflag = True
@@ -27,14 +27,48 @@ _devflag = True
 
 def swmode(sheet, dfsheet, size):
     """Apply sliding window to sheet."""
+    A = dfsheet
+    _Asum = A.sum(axis=0)
+    for column in A.columns:
+        A.loc[:, column] = A.loc[:, column].div(_Asum[column])
+    _Amean = A.mean(axis=1)
+    A['mean'] = _Amean
+    A.sort(columns='mean', axis=0, ascending=False, inplace=True)
+    A.drop('mean', axis=1, inplace=True)
     with pd.ExcelWriter('sw_mode_' + str(size) + 't_' + sheet +
                         '.xlsx') as writer:
-        columnas = dfsheet.columns  # store columns names
-        dfsheet.index.name = ''
+        columnas = A.columns  # store columns names
+        A.index.name = ''
         for i in range(len(columnas)-size+1):
-            dfsheet.to_excel(excel_writer=writer,
+            A.to_excel(excel_writer=writer,
                              sheet_name='set_' + str(i+1),
                              columns=columnas[i:i+size])
+
+
+
+
+def sigma_auth(xl_file):
+    """ Process sheets of XLSX file to calculate sigma.
+
+    NOTE: Skip sheets starting by underscore."""
+    df_mean = pd.DataFrame()
+    df_std = pd.DataFrame()
+    dfs = {sheet: xl_file.parse(sheet, index_col=0) 
+        for sheet in xl_file.sheet_names if (sheet[0] != '_')}
+    print('> Processing sheets')
+    for sheet in dfs:
+        A = dfs[sheet]
+        _Amean = A.mean(axis=1)
+        _Astd = A.std(axis=1)
+        df_mean[sheet] = _Amean
+        df_std[sheet] = _Astd
+    df_mean.sort_index(axis=1, inplace=True)
+    df_std.sort_index(axis=1, inplace=True)
+    with pd.ExcelWriter('variance_mean.xlsx') as writer:
+        df_mean.to_excel(excel_writer=writer, sheet_name='average')
+        df_std.to_excel(excel_writer=writer, sheet_name='std_dev')
+
+
 
 
 def sw_authomatic_mode(xl_file):
@@ -114,6 +148,11 @@ parser.add_argument(
     action='store_true',
     help='select sheets to process',
 )
+parser.add_argument(
+    '-d', '--variance',
+    action='store_true',
+    help='sigma and mean of each sheet',
+)
 args = parser.parse_args()
 file_name = args.input
 wind_size = args.window
@@ -133,5 +172,8 @@ if args.authomatic:
     sw_authomatic_mode(xl_file)
 elif args.sheets:
     sw_interactive_mode(xl_file)
+elif args.variance:
+    sigma_auth(xl_file)
+
 
 print()

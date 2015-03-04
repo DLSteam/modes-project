@@ -66,7 +66,7 @@ sw_mode <- function(size) {
 
 # read complexCruncher output
 
-cmplx_data <- read.xlsx("cmplxcruncher.xlsx", sheetName="feces_genus_6slmode", header=TRUE)
+cmplx_data <- read.xlsx("female_4t_CORE.xlsx", sheetName="sw_mode_4t_feces_genus", header=TRUE)
 x <- 1:length(cmplx_data$xW_B)
 
 p1 <- ggplot(cmplx_data, aes(x=x, y=cmplx_data$xW_B)) + 
@@ -92,3 +92,67 @@ dev.off()
 u <- c(6,12,25) # points where the lines are going to be drawn
 p1 <- p1 + geom_vline(xintercept=u, colour="blue") 
 p2 <- p2 + geom_vline(xintercept=u, colour="yellow")
+
+
+
+# CORE files
+############################
+### WARNING!!! Test zone ###
+############################
+
+CORE_plot <- function(fraction) {
+	
+	x <<- 1:(length(cmplx_data$xW_B)/4)
+	start <- c()
+	if (fraction == core){
+		start <- c(1)
+	} else {
+		if (fraction == tailless) {
+			start <- c(2)
+		} else {
+			if (fraction == tail) {
+				start <- c(3)
+			}
+			else {
+				if (fraction == normal) {
+					start <- c(4)
+				}
+			}
+		}
+	}
+
+	xW_B <- cmplx_data$xW_B[seq(start,length(cmplx_data$xW_B), 4)]
+	xW_B_err <- cmplx_data$xW_B_err[seq(start,length(cmplx_data$xW_B), 4)]
+
+	xW_beta <- cmplx_data$xW_beta[seq(start,length(cmplx_data$xW_B), 4)]
+	xW_beta_err <- cmplx_data$xW_beta[seq(start,length(cmplx_data$xW_B), 4)]
+
+	p1 <- ggplot(cmplx_data, aes(x=x, y=xW_B)) + 
+		geom_errorbar(aes(ymin=xW_B-xW_B_err, ymax=xW_B+xW_B_err), width=.1) + 
+		geom_line() + geom_point() + 
+		xlab("timeset") + ylab("wV core") + ggtitle("wV variation core") + # axis and plot labels   
+		theme_bw() # sets background colour to white
+	
+}
+
+
+xW_B_core <- cmplx_data$xW_B[seq(1,length(cmplx_data$xW_B), 4)]
+xW_B_err_core <- cmplx_data$xW_B_err[seq(1,length(cmplx_data$xW_B), 4)]
+
+
+p1 <- ggplot(cmplx_data, aes(x=x, y=xW_B_core)) + 
+	geom_errorbar(aes(ymin=xW_B_core-xW_B_err_core, ymax=xW_B_core+xW_B_err_core), width=.1) + 
+	geom_line() + geom_point() + 
+	xlab("timeset") + ylab("wV core") + ggtitle("wV variation core") + # axis and plot labels   
+	theme_bw() # sets background colour to white
+
+
+p2 <- ggplot(cmplx_data, aes(x=x, y=xW_B_tailless)) + 
+	geom_errorbar(aes(ymin=xW_B_tailless-xW_B_err_tailless, ymax=xW_B_tailless+xW_B_err_tailless), width=.1) + 
+	geom_line() + geom_point() + 
+	xlab("timeset") + ylab("wV tail") + ggtitle("wV variation tailless") + # axis and plot labels   
+	theme_bw() # sets background colour to white
+
+
+
+

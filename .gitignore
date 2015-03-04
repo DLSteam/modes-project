@@ -56,3 +56,5 @@ complexCruncher.xlsx
 *.eps
 *.ps
 *.logfile
+*.RData
+*.Rhistory
